@@ -10,7 +10,7 @@ import numpy as np
 
 def show_real_argo_overview():
     """Display overview page with real ARGO data"""
-    st.title("🌊 Indian Ocean ARGO Data Overview")
+    st.title("Indian Ocean ARGO Data Overview")
     st.caption("Real oceanographic data from ARGO floats - January 2024")
     
     # Get real ARGO data and stats
@@ -19,11 +19,11 @@ def show_real_argo_overview():
     
     # Data source indicator
     if argo_stats['total_measurements'] > 0:
-        st.success(f"✅ **Real ARGO Data Active** - {argo_stats['total_measurements']:,} measurements from {argo_stats['unique_floats']} floats")
+        st.success(f"**Real ARGO Data Active** - {argo_stats['total_measurements']:,} measurements from {argo_stats['unique_floats']} floats")
         date_range = f"{argo_stats['earliest_date']} to {argo_stats['latest_date']}"
-        st.info(f"📅 **Data Period**: {date_range}")
+        st.info(f"**Data Period**: {date_range}")
     else:
-        st.warning("⚠️ No ARGO data available")
+        st.warning("No ARGO data available")
         return
     
     # KPI Metrics using real ARGO data
@@ -31,34 +31,34 @@ def show_real_argo_overview():
     
     with col1:
         st.metric(
-            label="🚢 Active ARGO Floats",
+            label="Active ARGO Floats",
             value=str(argo_stats['unique_floats']),
             delta=f"{argo_stats['total_measurements']:,} measurements"
         )
     
     with col2:
         st.metric(
-            label="🌡️ Avg Ocean Temperature",
+            label="Avg Ocean Temperature",
             value=f"{argo_stats['avg_temperature']:.1f}°C",
             delta="Real-time"
         )
     
     with col3:
         st.metric(
-            label="🧂 Avg Salinity",
+            label="Avg Salinity",
             value=f"{argo_stats['avg_salinity']:.1f} PSU",
             delta="Real-time"
         )
     
     with col4:
         st.metric(
-            label="🌐 Ocean Regions",
+            label=" Ocean Regions",
             value=str(len(argo_stats['regional_breakdown'])),
             delta="Covered areas"
         )
     
     # Regional breakdown
-    st.subheader("📊 Regional Data Summary")
+    st.subheader(" Regional Data Summary")
     
     if argo_stats['regional_breakdown']:
         regional_df = pd.DataFrame(argo_stats['regional_breakdown'])
@@ -234,4 +234,5 @@ def show_real_argo_overview():
         st.dataframe(display_data, use_container_width=True)
 
 if __name__ == "__main__":
+
     show_real_argo_overview()
