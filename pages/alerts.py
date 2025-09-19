@@ -51,11 +51,11 @@ def show_page():
     
     with col1:
         total_alerts = len(alerts)
-        st.metric("📊 Total Alerts", total_alerts)
+        st.metric("Total Alerts", total_alerts)
     
     with col2:
         unread_alerts = len([a for a in alerts if not a['isRead']])
-        st.metric("📮 Unread", unread_alerts)
+        st.metric("Unread", unread_alerts)
     
     with col3:
         critical_alerts = len([a for a in alerts if a['severity'] == 'critical'])
@@ -65,7 +65,7 @@ def show_page():
     with col4:
         recent_alerts = len([a for a in alerts if 
                            (datetime.now() - datetime.fromisoformat(a['timestamp'])).total_seconds() < 3600])
-        st.metric("🕐 Last Hour", recent_alerts)
+        st.metric("Last Hour", recent_alerts)
     
     st.divider()
     
@@ -132,7 +132,7 @@ def show_page():
     
     # Alert Statistics
     st.divider()
-    st.subheader("📈 Alert Analytics")
+    st.subheader("Alert Analytics")
     
     col1, col2 = st.columns(2)
     
@@ -162,7 +162,7 @@ def show_page():
 
 def show_alert_details(alert):
     """Show detailed alert information in a modal"""
-    with st.expander(f"🔍 Alert Details: {alert['title']}", expanded=True):
+    with st.expander(f"Alert Details: {alert['title']}", expanded=True):
         col1, col2 = st.columns(2)
         
         with col1:
@@ -199,3 +199,4 @@ def show_alert_details(alert):
             st.write("- Review alert parameters")
             st.write("- Take appropriate safety measures")
             st.write("- Contact relevant authorities if needed")
+
