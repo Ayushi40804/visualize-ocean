@@ -1,6 +1,118 @@
 from datetime import datetime, timedelta
 import random
+import pandas as pd
 from typing import List, Dict, Any
+from utils.database import ArgoDatabase
+
+# Global database instance
+_db_instance = None
+
+def get_database():
+    """Get or create database instance"""
+    global _db_instance
+    if _db_instance is None:
+        _db_instance = ArgoDatabase()
+    return _db_instance
+
+def get_real_argo_data(limit: int = 100) -> pd.DataFrame:
+    """Get real ARGO data from TiDB Cloud database"""
+    try:
+        db = get_database()
+        query = """
+        SELECT float_id, latitude, longitude, temperature, salinity, 
+               pressure, depth, ph, date_time, region
+        FROM argo_profiles 
+        WHERE temperature IS NOT NULL AND salinity IS NOT NULL
+        ORDER BY date_time DESC
+        LIMIT %s
+        """
+        
+        with db.engine.connect() as conn:
+            df = pd.read_sql_query(query, conn, params=(limit,))
+        return df
+    except Exception as e:
+        print(f"Error getting real ARGO data: {e}")
+        return pd.DataFrame()
+
+def get_argo_summary_stats() -> Dict[str, Any]:
+    """Get summary statistics from ARGO data in TiDB Cloud"""
+    try:
+        db = get_database()
+        
+        with db.engine.connect() as conn:
+            # Get basic stats
+            stats_query = """
+            SELECT 
+                COUNT(*) as total_measurements,
+                COUNT(DISTINCT float_id) as unique_floats,
+                AVG(temperature) as avg_temperature,
+                AVG(salinity) as avg_salinity,
+                AVG(ph) as avg_ph,
+                MIN(date_time) as earliest_date,
+                MAX(date_time) as latest_date
+            FROM argo_profiles 
+            WHERE temperature IS NOT NULL AND salinity IS NOT NULL
+            """
+            
+            result = pd.read_sql_query(stats_query, conn)
+            
+            if not result.empty:
+                row = result.iloc[0]
+                stats = {
+                    'total_measurements': int(row['total_measurements']),
+                    'unique_floats': int(row['unique_floats']),
+                    'avg_temperature': round(float(row['avg_temperature']), 2) if pd.notna(row['avg_temperature']) else 0,
+                    'avg_salinity': round(float(row['avg_salinity']), 2) if pd.notna(row['avg_salinity']) else 0,
+                    'avg_ph': round(float(row['avg_ph']), 2) if pd.notna(row['avg_ph']) else 0,
+                    'earliest_date': str(row['earliest_date']) if pd.notna(row['earliest_date']) else None,
+                    'latest_date': str(row['latest_date']) if pd.notna(row['latest_date']) else None
+                }
+            else:
+                stats = {
+                    'total_measurements': 0,
+                    'unique_floats': 0,
+                    'avg_temperature': 0,
+                    'avg_salinity': 0,
+                    'avg_ph': 0,
+                    'earliest_date': None,
+                    'latest_date': None
+                }
+            
+            # Get regional breakdown
+            regional_query = """
+            SELECT region, COUNT(*) as count, 
+                   AVG(temperature) as avg_temp, 
+                   AVG(salinity) as avg_sal
+            FROM argo_profiles 
+            WHERE temperature IS NOT NULL AND salinity IS NOT NULL
+            GROUP BY region
+            """
+            regional_df = pd.read_sql_query(regional_query, conn)
+            
+            stats['regional_breakdown'] = [
+                {
+                    'region': row['region'],
+                    'count': int(row['count']),
+                    'avg_temperature': round(float(row['avg_temp']), 2) if pd.notna(row['avg_temp']) else 0,
+                    'avg_salinity': round(float(row['avg_sal']), 2) if pd.notna(row['avg_sal']) else 0
+                }
+                for _, row in regional_df.iterrows()
+            ]
+            
+            return stats
+        
+    except Exception as e:
+        print(f"Error getting ARGO summary stats: {e}")
+        return {
+            'total_measurements': 0,
+            'unique_floats': 0,
+            'avg_temperature': 0,
+            'avg_salinity': 0,
+            'avg_ph': 0,
+            'earliest_date': None,
+            'latest_date': None,
+            'regional_breakdown': []
+        }
 
 def get_mock_agrobots() -> List[Dict[str, Any]]:
     """Get mock Agro-Bot data"""

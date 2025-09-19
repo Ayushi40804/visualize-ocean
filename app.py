@@ -27,6 +27,7 @@ from utils.config import config
 
 # Import pages directly
 import pages.overview as overview
+import pages.argo_overview as argo_overview
 import pages.alerts as alerts  
 import pages.route_optimization as route_optimization
 import pages.ai_chat as ai_chat
@@ -313,7 +314,7 @@ def main():
     st.markdown("---")
     
     # Top navigation bar
-    col1, col2, col3, col4, col5, col6, col7 = st.columns([2, 1, 1, 1, 1, 1, 1])
+    col1, col2, col3, col4, col5, col6, col7, col8 = st.columns([2, 1, 1, 1, 1, 1, 1, 1])
     
     with col1:
         st.markdown("### Agro-Ocean SIH Dashboard")
@@ -326,26 +327,31 @@ def main():
             st.rerun()
     
     with col3:
+        if st.button("ARGO Data", use_container_width=True, type="primary" if st.session_state.current_page == "ARGO Overview" else "secondary"):
+            st.session_state.current_page = "ARGO Overview"
+            st.rerun()
+    
+    with col4:
         if st.button("Alerts", use_container_width=True, type="primary" if st.session_state.current_page == "Alerts" else "secondary"):
             st.session_state.current_page = "Alerts"
             st.rerun()
     
-    with col4:
+    with col5:
         if st.button("Routes", use_container_width=True, type="primary" if st.session_state.current_page == "Route Optimization" else "secondary"):
             st.session_state.current_page = "Route Optimization"
             st.rerun()
     
-    with col5:
+    with col6:
         if st.button("AI Chat", use_container_width=True, type="primary" if st.session_state.current_page == "AI Chat" else "secondary"):
             st.session_state.current_page = "AI Chat"
             st.rerun()
     
-    with col6:
+    with col7:
         if st.button("Settings", use_container_width=True, type="primary" if st.session_state.current_page == "Settings" else "secondary"):
             st.session_state.current_page = "Settings"
             st.rerun()
     
-    with col7:
+    with col8:
         # Dark mode toggle
         dark_mode_label = "Dark Mode" if not st.session_state.dark_mode else "Light Mode"
         if st.button(dark_mode_label, use_container_width=True):
@@ -382,6 +388,8 @@ def main():
     try:
         if st.session_state.current_page == "Overview":
             overview.show_page()
+        elif st.session_state.current_page == "ARGO Overview":
+            argo_overview.show_real_argo_overview()
         elif st.session_state.current_page == "Alerts":
             alerts.show_page()
         elif st.session_state.current_page == "Route Optimization":
@@ -394,7 +402,7 @@ def main():
         st.error(f"Error loading page '{st.session_state.current_page}': {str(e)}")
         st.write("Debug info:")
         st.write(f"Current page: {st.session_state.current_page}")
-        st.write(f"Available pages: Overview, Alerts, Route Optimization, AI Chat, Settings")
+        st.write(f"Available pages: Overview, ARGO Overview, Alerts, Route Optimization, AI Chat, Settings")
         
         # Show traceback for debugging
         import traceback

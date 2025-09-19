@@ -38,13 +38,14 @@ class EnvironmentConfig:
         return api_key
     
     def get_database_config(self) -> dict:
-        """Get database configuration"""
+        """Get database configuration - TiDB Cloud only"""
         return {
-            "db_path": os.getenv("DB_PATH", "argo_data.sqlite"),
-            "db_host": os.getenv("DB_HOST", "localhost"),
-            "db_user": os.getenv("DB_USER", "root"),
-            "db_password": os.getenv("DB_PASSWORD", ""),
-            "db_name": os.getenv("DB_NAME", "argo_data")
+            "tidb_host": "gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
+            "tidb_port": 4000,
+            "tidb_user": "2skvbktzy1zRC6L.root",
+            "tidb_password": "802twyBx0xPzBBOX",
+            "tidb_database": "test",
+            "use_tidb": True
         }
     
     def get_api_config(self) -> dict:

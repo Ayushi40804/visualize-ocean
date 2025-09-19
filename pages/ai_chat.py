@@ -127,24 +127,27 @@ def show_page():
             'type': 'assistant',
             'content': """Welcome to the ARGO Data Assistant! 🌊
 
-I can help you analyze oceanographic data from our ARGO float network. Here are some things you can ask me:
+I can help you analyze **real oceanographic data** from ARGO floats in the Indian Ocean. 
 
-**Data Queries:**
-- "What is the average temperature at 50 meters depth?"
-- "Show me salinity measurements from the Arabian Sea"
-- "Find the highest dissolved oxygen levels"
+📅 **Current Dataset**: January 2024 measurements from 10,000+ observations
+🌍 **Coverage**: Arabian Sea, Bay of Bengal, and broader Indian Ocean
+🚢 **Sources**: Multiple ARGO floats with temperature, salinity, pressure, and depth data
 
-**Bot Monitoring:**
-- "What's the status of all Agro-Bots?"
-- "Show me data from Agro-Bot Alpha"
-- "Which bots need maintenance?"
+**Sample Questions:**
+- "What is the average temperature in the Arabian Sea in January 2024?"
+- "Show me salinity measurements at different depths"
+- "Compare temperatures between Arabian Sea and Bay of Bengal"
+- "Find the deepest measurements in our dataset"
+- "What are the temperature variations by region?"
+- "Show me recent data from float 2902388"
 
-**Analysis:**
-- "Compare temperatures between different regions"
-- "Find pollution hotspots"
-- "Show ocean conditions over time"
+**Data Analysis:**
+- "Plot temperature vs depth profiles"
+- "Find unusual temperature or salinity readings"
+- "Show distribution of measurements by region"
+- "Calculate average ocean conditions by area"
 
-Feel free to ask me anything about our oceanographic data!""",
+Feel free to ask me anything about our January 2024 Indian Ocean ARGO data!""",
             'timestamp': datetime.now().isoformat()
         }
         st.session_state.chat_messages.append(welcome_message)
@@ -158,11 +161,43 @@ Feel free to ask me anything about our oceanographic data!""",
         if health["status"] == "healthy":
             st.success("Database: Healthy ✅")
             
+            # Show data source
+            data_source = health.get("data_source", "Unknown")
+            if data_source == "Real NetCDF Data":
+                st.info("🌊 Using Real ARGO Data")
+            else:
+                st.info("🧪 Using Sample Data")
+            
             # Show record counts
             records = health.get("records", {})
             st.metric("ARGO Profiles", records.get("argo_profiles", 0))
             st.metric("Ocean Conditions", records.get("ocean_conditions", 0))
             st.metric("Agro-Bots", records.get("agro_bots", 0))
+            
+            # NetCDF Data Controls
+            st.divider()
+            st.subheader("🌊 Real Data Controls")
+            
+            if not health.get("use_real_data", False):
+                if st.button("📥 Load Indian Ocean ARGO Data", use_container_width=True):
+                    with st.spinner("Downloading and processing Indian Ocean ARGO NetCDF data..."):
+                        st.info("🔄 This may take several minutes...")
+                        st.info("📡 Sources: NOAA NCEI & IFREMER Indian Ocean")
+                        st.info("🌊 Coverage: Arabian Sea, Bay of Bengal, Indian Ocean")
+                        
+                        success = db_manager.use_netcdf_data()
+                        if success:
+                            st.success("✅ Real Indian Ocean ARGO data loaded successfully!")
+                            st.rerun()
+                        else:
+                            st.error("❌ Failed to load NetCDF data. Check logs for details.")
+                
+                st.caption("⚠️ Downloads real ARGO data from NOAA & IFREMER servers")
+                st.caption("🎯 Indian Ocean specific data sources")
+            else:
+                st.success("✅ Using Real Indian Ocean ARGO Data")
+                st.caption("🎯 Sources: NOAA NCEI & IFREMER Indian Ocean")
+                st.caption("🌊 Live oceanographic measurements")
         else:
             st.error(f"Database Error: {health.get('error', 'Unknown')}")
         
